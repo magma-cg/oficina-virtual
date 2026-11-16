@@ -13,7 +13,7 @@ Ponle tu marca, tus colores y tus agentes, y conéctala a tus sesiones de Claude
 Solo necesitas [Node.js](https://nodejs.org) 18 o más nuevo. No hay nada que instalar.
 
 ```bash
-git clone https://github.com/msg123455/oficina-virtual.git
+git clone https://github.com/magma-cg/oficina-virtual.git
 cd oficina-virtual
 node server.mjs
 ```
