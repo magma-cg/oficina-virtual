@@ -1,0 +1,300 @@
+/* La oficina. Las letras de la marca (Archivo Expanded en los titulares, Space Grotesk en el texto), el gris claro de día y el
+   negro de la casa de noche. Lo que se mueve es la maqueta en 3D; aquí solo va la tipografía, que así sale nítida a cualquier
+   resolución. */
+@font-face {
+  font-family: "Archivo";
+  src: url("marca/archivo.ttf") format("truetype");
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("marca/space-grotesk.ttf") format("truetype");
+  font-weight: 300 700;
+  font-display: swap;
+}
+:root {
+  --fondo: #EEF1F3;
+  --texto: #0B0B0B;
+  --texto2: #6E6E73;
+  --texto3: #A1A1A6;
+  --halo: rgba(255, 255, 255, .96);
+  --pista: rgba(118, 118, 128, .12);
+  --segmento: #FFFFFF;
+  --sombra-segmento: 0 3px 8px rgba(0, 0, 0, .12), 0 3px 1px rgba(0, 0, 0, .04);
+  --filete: rgba(60, 60, 67, .18);
+  --u: 1px;                      /* la unidad de los rótulos: la escala de la escena, la pone oficina.js */
+  --resorte: cubic-bezier(.22, 1.18, .36, 1);
+  --suave: cubic-bezier(.25, .1, .25, 1);
+  color-scheme: light;
+}
+:root[data-tema="noche"] {
+  --fondo: #04090F;
+  --texto: #F2F5F9;
+  --texto2: #8B97A6;
+  --texto3: #4E5A69;
+  --halo: rgba(4, 9, 15, .9);
+  --pista: rgba(118, 118, 128, .24);
+  --segmento: #2A3441;
+  --sombra-segmento: 0 3px 8px rgba(0, 0, 0, .4);
+  --filete: rgba(84, 84, 88, .45);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: "Space Grotesk", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+  transition: background-color .6s var(--suave);
+}
+
+.oficina {
+  position: fixed;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(1.4vh) scale(.988);
+  transition: opacity 1s var(--suave), transform 1.3s var(--resorte);
+}
+.oficina.lista { opacity: 1; transform: none; }
+.capa { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.escena { transition: opacity .5s var(--suave); outline: none; }
+.oficina.cambiando .escena { opacity: 0; }
+.rotulos { pointer-events: none; will-change: transform; contain: layout style; }
+
+/* ---------------------------------------------------------------------------------------------- los rótulos */
+.rotulo {
+  position: absolute;
+  left: 0; top: 0;
+  /* El sitio lo pone oficina.js con `translate`; esto solo lo centra encima de su punto. */
+  transform: translate(-50%, -100%);
+  text-align: center;
+  white-space: nowrap;
+  line-height: 1.18;
+  /* Un contorno sólido del color del fondo detrás de cada letra (pintado antes que la letra) y una sombra suave: se lee
+     sobre el piso, la madera o el vidrio, sin recuadro. */
+  -webkit-text-stroke: .3em var(--halo);
+  paint-order: stroke fill;
+  text-shadow: 0 .06em .5em var(--halo);
+  transition: opacity .45s var(--suave);
+  animation: aparece .8s var(--resorte) both;
+  animation-delay: calc(400ms + var(--i, 0) * 22ms);
+}
+.rotulo.oculto { visibility: hidden; }
+/* Cuando se pisan con otro, queda solo el nombre. */
+.rotulo.compacto .estado, .rotulo.compacto .detalle, .rotulo.compacto .mas { display: none; }
+.rotulo.compacto .nombre { font-size: calc(var(--u) * .26); }
+@keyframes aparece { from { opacity: 0; transform: translate(-50%, calc(-100% + .6em)); } }
+/* Cambió de estado: la línea del estado entra de nuevo, sin saltar. */
+.rotulo.cambia .estado, .rotulo.cambia .detalle { animation: cambia .7s var(--resorte) both; }
+@keyframes cambia { from { opacity: 0; transform: translateY(.35em); } }
+.rotulo .nombre {
+  font-size: calc(var(--u) * .31);
+  font-weight: 600;
+  letter-spacing: -.005em;
+  color: var(--texto);
+}
+.rotulo .estado {
+  font-size: calc(var(--u) * .245);
+  font-weight: 500;
+  color: var(--texto2);
+  font-variant-numeric: tabular-nums;
+}
+.rotulo .detalle {
+  font-size: calc(var(--u) * .215);
+  color: var(--texto3);
+  max-width: calc(var(--u) * 2.2);
+  margin: 0 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rotulo .detalle:empty { display: none; }
+.rotulo.trabajando .estado { color: var(--texto); }
+.rotulo.espera .estado { color: var(--c); font-weight: 560; }
+.rotulo .cargo {
+  margin-left: .38em;
+  font-size: .74em;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--texto2);
+}
+.rotulo .cargo:empty { display: none; }
+.rotulo.cerrado .nombre { color: var(--texto2); font-size: calc(var(--u) * .26); }
+.rotulo.cerrado .cargo { color: var(--texto2); }
+/* El cerrado dice solo su nombre: «Cerrado» y lo demás, al pasar el cursor. */
+.rotulo.cerrado:not(.encima) .estado, .rotulo.cerrado:not(.encima) .detalle, .rotulo.cerrado:not(.encima) .mas { display: none; }
+.rotulo.cerrado .estado { color: var(--texto3); }
+.rotulo.persona .nombre { font-size: calc(var(--u) * .3); }
+/* Al pasar el cursor: lo completo, sin recortar. */
+.rotulo.encima { z-index: 2; }
+.rotulo.encima .detalle { max-width: none; color: var(--texto2); }
+.rotulo .mas { display: none; font-size: calc(var(--u) * .19); color: var(--texto3); font-variant-numeric: tabular-nums; }
+.rotulo.encima .mas { display: block; }
+/* Cerca, hay sitio para decir más: desde cuándo, la bandeja y el detalle entero. */
+.rotulos.cerca .rotulo .mas { display: block; }
+/* Los cerrados, de cerca, solo con su nombre y «Cerrado»: lo demás al pasar el cursor. */
+.rotulos.cerca .rotulo.cerrado:not(.encima) .mas { display: none; }
+.rotulos.cerca .rotulo .detalle { max-width: calc(var(--u) * 3.2); }
+
+/* ---------------------------------------------------------------------------------------------- la cámara */
+.oficina { touch-action: none; }
+.oficina .escena { cursor: grab; }
+.oficina.acercable .escena { cursor: zoom-in; }
+.oficina.arrastrando .escena { cursor: grabbing; }
+/* De cerca la oficina pasa por debajo del título y del registro: un velo del color del fondo los deja leer. */
+.velo {
+  position: fixed;
+  left: 0; right: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .5s var(--suave);
+}
+.velo.arriba { top: 0; height: calc(clamp(18px, 3.6vh, 96px) + clamp(26px, 2.05vw, 78px) * 3.6); background: linear-gradient(color-mix(in srgb, var(--fondo) 72%, transparent) 30%, transparent); }
+.velo.abajo { bottom: 0; right: auto; width: min(52vw, 1900px); height: min(34vh, 26em); font-size: clamp(12px, .72vw, 28px); background: radial-gradient(ellipse 100% 100% at 0% 100%, color-mix(in srgb, var(--fondo) 80%, transparent) 38%, transparent 72%); }
+.velo { opacity: 1; }
+.zoom {
+  position: fixed;
+  right: clamp(20px, 2.8vw, 120px);
+  bottom: clamp(16px, 3.2vh, 90px);
+  display: flex;
+  align-items: flex-end;
+  gap: .7em;
+  font-size: clamp(12px, .7vw, 26px);
+}
+.zoom .par, .zoom .todo {
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--segmento) 78%, transparent);
+  -webkit-backdrop-filter: saturate(1.6) blur(18px);
+  backdrop-filter: saturate(1.6) blur(18px);
+  box-shadow: 0 0 0 .5px var(--filete), 0 6px 18px rgba(0, 0, 0, .10);
+}
+.zoom .par { display: grid; overflow: hidden; }
+.zoom button {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  background: transparent;
+  color: var(--texto);
+  font: inherit;
+  font-weight: 500;
+  letter-spacing: -.01em;
+  cursor: pointer;
+  transition: background-color .25s var(--suave), opacity .25s var(--suave), transform .35s var(--resorte);
+}
+.zoom .par button { width: 2.9em; height: 2.9em; display: grid; place-items: center; }
+.zoom .par button + button { box-shadow: inset 0 .5px 0 var(--filete); }
+.zoom svg { width: 1.25em; height: 1.25em; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; }
+.zoom button:hover:not(:disabled) { background: var(--pista); }
+.zoom button:active:not(:disabled) { transform: scale(.94); }
+.zoom button:disabled { opacity: .3; cursor: default; }
+.zoom button:focus-visible { outline: 2px solid #0A84FF; outline-offset: 2px; }
+.zoom .todo { padding: .78em 1.2em; opacity: 0; transform: translateX(.6em); pointer-events: none; }
+.zoom.acercado .todo { opacity: 1; transform: none; pointer-events: auto; }
+
+/* ---------------------------------------------------------------------------------------------- la cabeza */
+.cabeza {
+  position: fixed;
+  top: clamp(18px, 3.6vh, 96px);
+  left: clamp(20px, 2.8vw, 120px);
+  pointer-events: none;
+}
+.cabeza h1 {
+  margin: 0;
+  font-family: "Archivo", "Space Grotesk", system-ui, sans-serif;
+  font-stretch: 125%;
+  font-size: clamp(24px, 1.85vw, 72px);
+  font-weight: 600;
+  letter-spacing: -.01em;
+  line-height: 1.05;
+}
+.resumen {
+  margin: .5em 0 0;
+  font-size: clamp(13px, .84vw, 32px);
+  color: var(--texto2);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.004em;
+}
+.resumen b { font-weight: 600; color: var(--texto); }
+.resumen .sep { color: var(--texto3); padding: 0 .45em; }
+
+/* ---------------------------------------------------------------------------------------------- día y noche */
+.tema {
+  position: fixed;
+  top: clamp(18px, 3.6vh, 96px);
+  right: clamp(20px, 2.8vw, 120px);
+  display: grid;
+  grid-auto-flow: column;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--pista);
+  font-size: clamp(12px, .7vw, 26px);
+}
+.tema button {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: .42em 1.25em;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--texto);
+  font: inherit;
+  font-weight: 500;
+  letter-spacing: -.01em;
+  cursor: pointer;
+  transition: background-color .3s var(--suave), box-shadow .3s var(--suave), transform .35s var(--resorte);
+}
+.tema button[aria-checked="true"] { background: var(--segmento); box-shadow: var(--sombra-segmento); }
+.tema button:active { transform: scale(.96); }
+.tema button:focus-visible { outline: 2px solid #0A84FF; outline-offset: 2px; }
+
+/* ---------------------------------------------------------------------------------------------- los encargos */
+.mensajeria {
+  position: fixed;
+  left: clamp(20px, 2.8vw, 120px);
+  bottom: clamp(16px, 3.2vh, 90px);
+  width: min(34vw, 1300px);
+  pointer-events: none;
+  font-size: clamp(12px, .72vw, 28px);
+}
+.mensajeria h2 {
+  margin: 0 0 .55em;
+  font-size: 1em;
+  font-weight: 500;
+  color: var(--texto3);
+  font-variant-caps: all-small-caps;
+  letter-spacing: .07em;
+}
+.filas { list-style: none; margin: 0; padding: 0; }
+.filas li {
+  display: grid;
+  grid-template-columns: 3.4em max-content 1fr;
+  gap: .9em;
+  align-items: baseline;
+  padding: .42em 0;
+  border-top: 1px solid var(--filete);
+  animation: entra .7s var(--resorte) both;
+}
+.filas li:first-child { border-top: 0; }
+.filas .hora { color: var(--texto3); font-variant-numeric: tabular-nums; }
+.filas .ruta { font-weight: 600; letter-spacing: -.005em; }
+.filas .ruta .flecha { color: var(--texto3); font-weight: 400; padding: 0 .3em; }
+.filas .ruta .cargo { margin-left: .3em; font-weight: 400; color: var(--texto3); font-size: .9em; }
+.filas .que { color: var(--texto2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.filas li.respuesta .que::before, .filas li.voz-respuesta .que::before { content: "Respuesta: "; color: var(--texto3); }
+.filas li.voz .que::before { content: "Pedido: "; color: var(--texto3); }
+@keyframes entra { from { opacity: 0; transform: translateY(.7em); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 760px) {
+  .mensajeria { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .filas li, .rotulo, .rotulo.cambia .estado, .rotulo.cambia .detalle { animation: none; }
+  body, .escena, .oficina { transition: none; }
+  .oficina { transform: none; }
+}

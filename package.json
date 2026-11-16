@@ -1,0 +1,9 @@
+{
+  "name": "oficina-virtual",
+  "version": "1.0.0",
+  "description": "Una oficina en 3D donde tus agentes de IA trabajan en vivo. Ponle tu marca.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": { "start": "node server.mjs", "estado": "node server.mjs estado" },
+  "engines": { "node": ">=18" }
+}

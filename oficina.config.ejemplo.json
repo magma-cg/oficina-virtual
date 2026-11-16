@@ -1,0 +1,83 @@
+{
+  "fuente": "demo",
+  "puerto": 5250,
+  "carpetaClaude": "~/.claude/projects",
+
+  "marca": {
+    "nombre": "Magma",
+    "titulo": "La oficina",
+    "logo": "marca/logo.svg",
+    "isotipo": "marca/isotipo.svg",
+    "colores": {
+      "vino": "#450F29",
+      "rojo": "#C91F2B",
+      "naranja": "#D3592F",
+      "amarillo": "#FFD67B",
+      "negro": "#0B0B0B",
+      "gris": "#E3E3E3"
+    }
+  },
+
+  "dueno": { "nombre": "Tú", "genero": "m" },
+  "recepcion": { "nombre": "Aria", "genero": "f", "color": "marca" },
+  "direccion": "Dirección",
+
+  "zonas": [
+    {
+      "clave": "it", "nombre": "Tecnología", "color": "morado",
+      "agentes": [
+        { "id": "cto", "nombre": "Andrés", "cargo": "CTO", "genero": "m" },
+        { "id": "devops", "nombre": "Sofía", "cargo": "DevOps", "genero": "f" },
+        { "id": "backend", "nombre": "Mateo", "cargo": "Backend", "genero": "m" },
+        { "id": "frontend", "nombre": "Laura", "cargo": "Frontend", "genero": "f" },
+        { "id": "apps", "nombre": "Tomás", "cargo": "Apps", "genero": "m" }
+      ]
+    },
+    {
+      "clave": "marketing", "nombre": "Marketing", "color": "rosado",
+      "agentes": [
+        { "id": "cmo", "nombre": "Valeria", "cargo": "CMO", "genero": "f" },
+        { "id": "seo", "nombre": "Daniel", "cargo": "SEO y Web", "genero": "m" },
+        { "id": "video", "nombre": "Camilo", "cargo": "Edición", "genero": "m" },
+        { "id": "redes", "nombre": "Mariana", "cargo": "Redes", "genero": "f" },
+        { "id": "email", "nombre": "Juliana", "cargo": "Email", "genero": "f" },
+        { "id": "diseno", "nombre": "Isabela", "cargo": "Diseño", "genero": "f" }
+      ]
+    },
+    {
+      "clave": "juridico", "nombre": "Legal", "color": "titanio",
+      "agentes": [
+        { "id": "legal", "nombre": "Catalina", "cargo": "Legal", "genero": "f" }
+      ]
+    },
+    {
+      "clave": "comercial", "nombre": "Ventas", "color": "rojo",
+      "agentes": [
+        { "id": "cco", "nombre": "Santiago", "cargo": "Ventas", "genero": "m" },
+        { "id": "whatsapp", "nombre": "Paula", "cargo": "WhatsApp", "genero": "f" },
+        { "id": "prospeccion", "nombre": "Martín", "cargo": "Prospección", "genero": "m" }
+      ]
+    },
+    {
+      "clave": "finanzas", "nombre": "Finanzas", "color": "azul",
+      "agentes": [
+        { "id": "cfo", "nombre": "Felipe", "cargo": "CFO", "genero": "m" },
+        { "id": "contabilidad", "nombre": "Natalia", "cargo": "Contabilidad", "genero": "f", "color": "turquesa" },
+        { "id": "impuestos", "nombre": "Ricardo", "cargo": "Impuestos", "genero": "m", "color": "indigo" }
+      ]
+    },
+    {
+      "clave": "proyectos", "nombre": "Proyectos", "color": "verde",
+      "agentes": [
+        { "id": "producto", "nombre": "Gabriela", "cargo": "Producto", "genero": "f" },
+        { "id": "soporte", "nombre": "Sebastián", "cargo": "Soporte", "genero": "m" },
+        { "id": "qa", "nombre": "Esteban", "cargo": "QA", "genero": "m" },
+        { "id": "datos", "nombre": "Luisa", "cargo": "Datos", "genero": "f" },
+        { "id": "automatizaciones", "nombre": "Nicolás", "cargo": "Automatizaciones", "genero": "m" },
+        { "id": "investigacion", "nombre": "Manuela", "cargo": "Investigación", "genero": "f" },
+        { "id": "operaciones", "nombre": "Diego", "cargo": "Operaciones", "genero": "m" },
+        { "id": "clientes", "nombre": "Carolina", "cargo": "Clientes", "genero": "f" }
+      ]
+    }
+  ]
+}
