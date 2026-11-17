@@ -4,6 +4,8 @@ Una oficina en 3D, en el último piso de una torre, donde tus agentes de IA trab
 
 Ponle tu marca, tus colores y tus agentes, y conéctala a tus sesiones de Claude Code para verlas trabajar de verdad.
 
+**Mírala en vivo: https://magma-cg.github.io/oficina-virtual/**
+
 ![La oficina de día](docs/dia.jpg)
 
 ![La oficina de noche](docs/noche.jpg)
@@ -21,6 +23,15 @@ node server.mjs
 Y abre **http://127.0.0.1:5250** en Chrome o Edge.
 
 Arranca en modo demo: los agentes trabajan, esperan, descansan, se mandan encargos y reciben pedidos tuyos, todo simulado, para que la veas viva sin conectar nada.
+
+## Publícala gratis
+
+Como sitio estático, la oficina corre el modo demo sin servidor: sirve cualquier hosting de archivos.
+
+- **GitHub Pages:** haz tu copia del repo (Fork) y en tu copia ve a *Settings → Pages → Source* y escoge *GitHub Actions*. El flujo `.github/workflows/pages.yml` la publica en `https://<tu-usuario>.github.io/oficina-virtual/` cada vez que subas un cambio. Para que salga con tu marca, sube tu `oficina.config.json` (quítalo de `.gitignore`) o cambia el de ejemplo.
+- **Cualquier otro:** sube la carpeta `public/` con tu `oficina.config.json` adentro (Vercel, Netlify, Cloudflare Pages, tu servidor).
+
+El modo Claude Code solo funciona con `node server.mjs` en tu computador, porque lee tus sesiones locales: eso nunca sale a internet.
 
 ## Ponle tu marca
 

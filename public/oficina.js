@@ -721,13 +721,35 @@ function actualizarBandejas(t) {
 }
 
 // ============================================================================================ los datos
+// Con el servidor (node server.mjs), los datos salen de /api/oficina. Publicada como sitio estático (GitHub Pages, Vercel,
+// cualquier carpeta servida), no hay /api: la página carga oficina.config.json y corre la simulación del modo demo ella misma.
+let estatica = null;
+async function configEstatica() {
+  for (const u of ['oficina.config.json', 'oficina.config.ejemplo.json']) {
+    try { const r = await fetch(u, { cache: 'no-store' }); if (r.ok) return await r.json(); } catch { /* el siguiente */ }
+  }
+  return null;
+}
+async function pedirOficina() {
+  if (!estatica) {
+    try {
+      const r = await fetch('/api/oficina', { cache: 'no-store' });
+      if (r.ok && (r.headers.get('content-type') || '').includes('json')) return await r.json();
+    } catch { /* sin servidor */ }
+    const config = await configEstatica();
+    if (!config) return null;
+    const { crearSimulacion } = await import('./simulacion.js');
+    estatica = { config, sim: crearSimulacion(config) };
+  }
+  return estatica.sim.foto();
+}
+
 let consulta = 0;
 async function cargar() {
   clearTimeout(consulta);
   try {
-    const r = await fetch('/api/oficina', { cache: 'no-store' });
-    if (r.ok) {
-      const j = await r.json();
+    const j = await pedirOficina();
+    if (j) {
       datos = j;
       const f = JSON.stringify(j.zonas);
       if (f !== firma) { firma = f; await construir(j); }
@@ -753,7 +775,7 @@ async function construir(j) {
   if (!logoSvg) {
     await Promise.all([document.fonts.load('600 64px Archivo'), document.fonts.load('500 32px "Space Grotesk"')]).catch(() => {});
     // La marca: el título, los colores y los dos logos, de oficina.config.json.
-    const marca = await fetch('/api/marca', { cache: 'no-store' }).then((r) => r.json()).catch(() => ({}));
+    const marca = estatica ? (estatica.config.marca || {}) : await fetch('/api/marca', { cache: 'no-store' }).then((r) => r.json()).catch(() => ({}));
     if (marca.colores) TX.ponerMarca(marca.colores);
     if (marca.titulo) { document.title = marca.titulo; $('.cabeza h1').textContent = marca.titulo; }
     if (marca.nombre) oficinaEl.setAttribute('aria-label', `La oficina de ${marca.nombre}`);
@@ -780,6 +802,7 @@ async function construir(j) {
   ubicarDeUna();
   gente.forEach((g) => { if (!plano.puestos[g.slug]) gente.delete(g.slug); });
   casa = null;
+  construidoEn = performance.now();
   encuadrar();
   const pedida = params.get('zona');
   const z = ['comedor', 'social', 'sala'].includes(pedida) ? plano.social : pedida === 'terraza' ? plano.terraza : plano.salas.find((s) => s.clave === pedida);
@@ -789,7 +812,7 @@ async function construir(j) {
 }
 
 // ============================================================================================ el cuadro
-let cuadro = 0, ultimo = 0, cuadrosSeg = 0, segundoEn = 0, lentos = 0;
+let cuadro = 0, ultimo = 0, cuadrosSeg = 0, segundoEn = 0, lentos = 0, construidoEn = 0;
 const medida = { ms: 0, fps: 0, llamadas: 0, triangulos: 0 };
 window.oficinaMedida = medida;
 // Para medir y revisar desde la consola; la página no lo usa.
@@ -845,18 +868,22 @@ function bucle(ahora) {
     // Si la tarjeta gráfica no da los cuadros que se piden, se baja la resolución un escalón (nunca por debajo de 1, ni si la
     // pidió la dirección con ?dpr). Tres segundos seguidos cortos, para no bajar por un tirón.
     const pedidos = moviendo ? 50 : fps;
-    lentos = medida.real < pedidos * 0.72 && !document.hidden ? lentos + 1 : 0;
+    // Los primeros segundos no cuentan: ahí se compilan los sombreadores y se suben las texturas, y cualquier tarjeta va lenta.
+    const calentando = performance.now() - construidoEn < 8000;
+    lentos = !calentando && medida.real < pedidos * 0.72 && !document.hidden ? lentos + 1 : 0;
     // Primero se sueltan los efectos (la oclusión, después el brillo y el desenfoque) y solo después la resolución.
     if (lentos >= 3 && !calidadPedida && post.nivel !== 'baja') {
       post.armar(post.nivel === 'alta' ? 'media' : 'baja');
       post.ponerNoche(tema === 'noche');
       lentos = 0;
+      construidoEn = performance.now();   // el cambio también compila: se vuelve a calentar antes de juzgar
     } else if (lentos >= 3 && !params.get('dpr') && renderer.getPixelRatio() > 1.01) {
       renderer.setPixelRatio(Math.max(1, renderer.getPixelRatio() * 0.82));
       renderer.setSize(innerWidth, innerHeight, false);
       post.tamano();
       medida.dpr = +renderer.getPixelRatio().toFixed(2);
       lentos = 0;
+      construidoEn = performance.now();
     }
     medida.calidad = post.nivel;
   }
